@@ -1,8 +1,3 @@
-/**
- * INFO + RDC — Application Frontend Logic
- * PWA, Push Notifications, Fetch Engine & Dynamic Rendering
- */
-
 const CONFIG = {
   API_BASE: '/api',
   VAPID_PUBLIC_KEY: 'BAKdVVtNU1YvnzlAZQw-j7qLqEi7M6bJ9BzA0DRSpTYHlJn1KW-W5wGCSh5tPDyfVmLc5Y109cH1bPx5gUQjOQo'
@@ -24,7 +19,7 @@ async function initApp() {
   try {
     await fetchContent();
   } catch (e) {
-    console.error('Erreur initialisation:', e);
+    console.error(`Erreur d'initialisation:`, e);
   } finally {
     if (loader) {
       loader.classList.add('opacity-0');
