@@ -7,7 +7,7 @@
   
   <meta name="description" content="Plateforme PWA d'agrégation d'actualités, offres d'emploi, événements et opportunités en République Démocratique du Congo.">
   <meta name="theme-color" content="#0F172A">
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="INFO + RDC">
   
@@ -29,7 +29,7 @@
   <link rel="apple-touch-icon" href="/logo.jpg">
   <link rel="stylesheet" href="/style.css">
   
-  <!-- Google Fonts & Tailwind CDN -->
+  <!-- Tailwind CDN & Config -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -55,10 +55,13 @@
       }
     }
   </script>
+
+  <!-- Script JS chargé de manière asynchrone avec versioning anti-cache -->
+  <script src="/app.js?v=2.1" defer></script>
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
-  <!-- Loader Initial High-Tech -->
+  <!-- Loader Initial avec sécurité de retrait automatique -->
   <div id="page-loader" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
     <div class="relative flex items-center justify-center">
       <div class="w-20 h-20 border-4 border-slate-800 border-t-brand-500 rounded-full animate-spin"></div>
@@ -66,6 +69,17 @@
     </div>
     <p class="mt-4 text-sm font-semibold tracking-widest text-slate-400 uppercase animate-pulse">Chargement d'INFO + RDC...</p>
   </div>
+
+  <!-- Fallback immédiat : détruit le loader après 1.5s quoi qu'il arrive avec JS -->
+  <script>
+    setTimeout(function() {
+      var loader = document.getElementById('page-loader');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(function() { loader.remove(); }, 400);
+      }
+    }, 1500);
+  </script>
 
   <!-- Header Mobile/Desktop -->
   <header class="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 transition-all">
@@ -119,7 +133,7 @@
       <div class="relative z-10 max-w-2xl space-y-6">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold">
           <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
-          Direct RDC • Plateforme Publique
+          Direct RDC • Portail National
         </div>
         <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
           Toute l'information utile de la RDC, <span class="bg-gradient-to-r from-brand-400 to-rdc-blue bg-clip-text text-transparent">au même endroit.</span>
@@ -189,7 +203,7 @@
 
   </main>
 
-  <!-- Modal Publication Administrée / Utilisateur -->
+  <!-- Modal Publication -->
   <div id="modal-publish" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transition-all scale-95 opacity-0 modal-container">
       <div class="p-6 border-b border-slate-800 flex justify-between items-center">
@@ -198,7 +212,6 @@
       </div>
       <form id="form-publish" class="p-6 space-y-4">
         
-        <!-- Honeypot -->
         <input type="text" name="website_hp" class="hidden" tabindex="-1" autocomplete="off">
 
         <div>
@@ -288,6 +301,5 @@
     </div>
   </footer>
 
-  <script src="/app.js"></script>
 </body>
 </html>
