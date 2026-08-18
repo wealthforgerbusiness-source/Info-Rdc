@@ -4,7 +4,7 @@
  */
 
 const CONFIG = {
-  API_BASE: 'https://info-rdc-backend.onrender.com/api', // Remplacer par l'URL Render réelle
+  API_BASE: 'https://info-rdc.onrender.com/api', // Remplacer par l'URL Render réelle
   VAPID_PUBLIC_KEY: 'BEl62iUYgUivxIkv69yViEuiBIa35368aGH1796GHG...' // Insérer votre VAPID Public Key
 };
 
