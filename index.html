@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>INFO + RDC — Toute l'information utile de la RDC, au même endroit</title>
+  
+  <meta name="description" content="Plateforme PWA d'agrégation d'actualités, offres d'emploi, événements et opportunités en République Démocratique du Congo.">
+  <meta name="theme-color" content="#0F172A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="INFO + RDC">
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://info-rdc.com/">
+  <meta property="og:title" content="INFO + RDC — L'essentiel de la RDC">
+  <meta property="og:description" content="Toute l'information utile de la RDC, au même endroit. Actualités, Emplois, Opportunités.">
+  <meta property="og:image" content="/logo.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="INFO + RDC">
+  <meta property="twitter:description" content="Toute l'information utile de la RDC, au même endroit.">
+  <meta property="twitter:image" content="/logo.jpg">
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/jpg" href="/logo.jpg">
+  <link rel="apple-touch-icon" href="/logo.jpg">
+  <link rel="stylesheet" href="/style.css">
+  
+  <!-- Google Fonts & Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            rdc: {
+              blue: '#007FFF',
+              yellow: '#F7D600',
+              red: '#CE1126'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- Loader Initial High-Tech -->
+  <div id="page-loader" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative flex items-center justify-center">
+      <div class="w-20 h-20 border-4 border-slate-800 border-t-brand-500 rounded-full animate-spin"></div>
+      <img src="/logo.jpg" alt="INFO + RDC Logo" class="w-12 h-12 rounded-full absolute object-cover">
+    </div>
+    <p class="mt-4 text-sm font-semibold tracking-widest text-slate-400 uppercase animate-pulse">Chargement d'INFO + RDC...</p>
+  </div>
+
+  <!-- Header Mobile/Desktop -->
+  <header class="sticky top-0 z-40 w-full backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <img src="/logo.jpg" alt="INFO + RDC Logo" class="w-10 h-10 rounded-xl object-cover ring-2 ring-brand-500/30 group-hover:scale-105 transition-transform">
+        <div class="flex flex-col">
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            INFO <span class="text-brand-500">+</span> RDC
+          </span>
+          <span class="text-[10px] text-slate-400 -mt-1 hidden sm:inline">Portail National d'Information</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800">
+        <button data-filter="tout" class="nav-btn active px-4 py-1.5 text-xs font-medium rounded-full text-white bg-brand-600 transition-all">Tout</button>
+        <button data-filter="actualite" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-full text-slate-400 hover:text-white transition-all">Actualités</button>
+        <button data-filter="emploi" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-full text-slate-400 hover:text-white transition-all">Emplois</button>
+        <button data-filter="evenement" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-full text-slate-400 hover:text-white transition-all">Événements</button>
+        <button data-filter="opportunite" class="nav-btn px-4 py-1.5 text-xs font-medium rounded-full text-slate-400 hover:text-white transition-all">Opportunités</button>
+      </nav>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-3">
+        <button id="btn-publish-trigger" class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 border border-slate-700 transition-all">
+          <span>Publier une annonce</span>
+        </button>
+        
+        <button id="btn-push-toggle" aria-label="Notifications" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-500/50 text-slate-300 hover:text-brand-500 transition-all relative">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+          <span id="push-indicator" class="hidden absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-slate-950"></span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Banner Offline -->
+  <div id="offline-banner" class="hidden bg-amber-500/10 border-b border-amber-500/20 text-amber-400 px-4 py-2 text-center text-xs font-medium">
+    Vous êtes actuellement hors connexion. Consultation du contenu en cache local.
+  </div>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+    <!-- Hero Section -->
+    <section class="relative rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-brand-900/20 p-8 sm:p-12 border border-slate-800/80 overflow-hidden shadow-2xl">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(59,130,246,0.1),transparent)] pointer-events-none"></div>
+      <div class="relative z-10 max-w-2xl space-y-6">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-brand-500 animate-ping"></span>
+          Direct RDC • Plateforme Publique
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          Toute l'information utile de la RDC, <span class="bg-gradient-to-r from-brand-400 to-rdc-blue bg-clip-text text-transparent">au même endroit.</span>
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base leading-relaxed">
+          Actualités nationales, opportunités de carrière, appels d'offres et événements culturels regroupés et filtrés en temps réel.
+        </p>
+        <div class="flex flex-wrap gap-4 pt-2">
+          <a href="#feed-anchor" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm shadow-lg shadow-brand-600/30 transition-all">Explorer le flux</a>
+          <button id="hero-push-btn" class="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm border border-slate-700 transition-all flex items-center gap-2">
+            🔔 Activer les alertes
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem / Solution Section -->
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 space-y-3">
+        <div class="text-xs font-bold text-rdc-red uppercase tracking-wider">Le Problème</div>
+        <h2 class="text-xl font-bold text-white">Trop d'informations. Trop d'endroits.</h2>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Les offres d'emploi, actualités cruciales et opportunités sont éparpillées sur des dizaines de groupes, réseaux sociaux et blogs peu fiables. Vous risquez de rater l'essentiel.
+        </p>
+      </div>
+      <div class="p-6 rounded-2xl bg-slate-900/40 border border-slate-800/60 space-y-3">
+        <div class="text-xs font-bold text-brand-400 uppercase tracking-wider">La Solution INFO + RDC</div>
+        <h2 class="text-xl font-bold text-white">Un hub centralisé & vérifié.</h2>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Agrégation automatisée des flux officiels et validation rigoureuse des offres administrées. Une interface rapide, sans création de compte, optimisée PWA.
+        </p>
+      </div>
+    </section>
+
+    <!-- Interactive Search & Filtering Bar -->
+    <section id="feed-anchor" class="space-y-6">
+      <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        
+        <!-- Search Input -->
+        <div class="relative w-full md:w-96">
+          <input type="text" id="search-input" placeholder="Rechercher une actualité, emploi, ville..." class="w-full bg-slate-900 border border-slate-800 focus:border-brand-500 rounded-xl px-4 py-3 pl-10 text-sm text-white placeholder-slate-500 outline-none transition-all">
+          <svg class="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+
+        <!-- Scrollable Category Tabs -->
+        <div class="w-full md:w-auto overflow-x-auto no-scrollbar flex items-center gap-2 py-1">
+          <button data-cat="ALL" class="cat-chip active-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-brand-600 text-white">Tout</button>
+          <button data-cat="Politique" class="cat-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Politique</button>
+          <button data-cat="Économie" class="cat-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Économie</button>
+          <button data-cat="Kinshasa" class="cat-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Kinshasa</button>
+          <button data-cat="Provinces" class="cat-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Provinces</button>
+          <button data-cat="Technologie" class="cat-chip px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap bg-slate-900 text-slate-400 hover:text-white border border-slate-800">Technologie</button>
+        </div>
+      </div>
+
+      <!-- Grid Content Display -->
+      <div id="content-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic JS Insertion -->
+      </div>
+
+      <!-- State Empty / Loader -->
+      <div id="grid-loader" class="hidden py-12 text-center">
+        <div class="inline-block w-8 h-8 border-4 border-slate-700 border-t-brand-500 rounded-full animate-spin"></div>
+        <p class="mt-2 text-xs text-slate-500">Mise à jour du flux...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal Publication Administrée / Utilisateur -->
+  <div id="modal-publish" class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transition-all scale-95 opacity-0 modal-container">
+      <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+        <h3 class="text-lg font-bold text-white">Publier une offre ou annonce</h3>
+        <button id="modal-close" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      </div>
+      <form id="form-publish" class="p-6 space-y-4">
+        
+        <!-- Honeypot -->
+        <input type="text" name="website_hp" class="hidden" tabindex="-1" autocomplete="off">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Type de contenu</label>
+          <select name="type" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+            <option value="emploi">Offre d'emploi</option>
+            <option value="evenement">Événement</option>
+            <option value="concours">Concours</option>
+            <option value="formation">Formation</option>
+            <option value="opportunite">Opportunité</option>
+            <option value="annonce">Annonce publique</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Titre de la publication</label>
+          <input type="text" name="titre" maxlength="120" required placeholder="ex: Recruitment Assistant RH - Kinshasa" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-xs font-semibold text-slate-400 uppercase">Texte / Résumé</label>
+            <span id="char-counter" class="text-[10px] text-slate-500">0 / 500</span>
+          </div>
+          <textarea name="texte" id="texte-input" maxlength="500" rows="3" required placeholder="Description succincte de l'offre ou de l'événement..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none resize-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Lien de redirection</label>
+            <input type="url" name="lien" required placeholder="https://..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Ville / Lieu</label>
+            <input type="text" name="ville" placeholder="ex: Kinshasa, Goma" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Date de Fin (Optionnel)</label>
+            <input type="date" name="date_fin" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Votre Email</label>
+            <input type="email" name="email" required placeholder="contact@domaine.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:border-brand-500 outline-none">
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500">Note: Votre publication sera soumise à modération automatique et manuelle avant diffusion publique.</p>
+
+        <button type="submit" id="btn-submit-form" class="w-full py-3 bg-brand-600 hover:bg-brand-500 font-semibold text-white text-sm rounded-xl transition-all shadow-lg shadow-brand-600/20">
+          Soumettre pour validation
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Mobile -->
+  <nav class="md:hidden fixed bottom-0 inset-x-0 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 z-40 px-6 py-2 flex justify-between items-center text-[10px]">
+    <button data-filter="tout" class="mobile-nav-btn text-brand-500 flex flex-col items-center gap-1">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+      <span>Accueil</span>
+    </button>
+    <button data-filter="actualite" class="mobile-nav-btn text-slate-400 flex flex-col items-center gap-1">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+      <span>Actus</span>
+    </button>
+    <button data-filter="emploi" class="mobile-nav-btn text-slate-400 flex flex-col items-center gap-1">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+      <span>Emplois</span>
+    </button>
+    <button id="btn-mobile-publish" class="text-slate-400 flex flex-col items-center gap-1">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      <span>Publier</span>
+    </button>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="bg-slate-950 border-t border-slate-900 py-10 mb-12 md:mb-0">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <div class="flex items-center gap-3">
+        <img src="/logo.jpg" alt="Logo" class="w-6 h-6 rounded object-cover">
+        <span>&copy; 2026 INFO + RDC. Plateforme d'agrégation d'utilité publique.</span>
+      </div>
+      <p class="italic">Slogan : « Toute l'information utile de la RDC, au même endroit. »</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
