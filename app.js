@@ -4,8 +4,8 @@
  */
 
 const CONFIG = {
-  API_BASE: 'https://info-rdc.onrender.com/api', // Remplacer par l'URL Render réelle
-  VAPID_PUBLIC_KEY: 'BEl62iUYgUivxIkv69yViEuiBIa35368aGH1796GHG...' // Insérer votre VAPID Public Key
+  API_BASE: '/api', // Route relative automatique pour Render
+  VAPID_PUBLIC_KEY: 'BAKdVVtNU1YvnzlAZQw-j7qLqEi7M6bJ9BzA0DRSpTYHlJn1KW-W5wGCSh5tPDyfVmLc5Y109cH1bPx5gUQjOQo'
 };
 
 let currentFilter = 'tout';
@@ -24,7 +24,7 @@ async function initApp() {
   try {
     await fetchContent();
   } catch (e) {
-    console.error('Erreur d'initialisation:', e);
+    console.error("Erreur d'initialisation:", e);
   } finally {
     if (loader) {
       loader.classList.add('opacity-0');
@@ -60,22 +60,26 @@ function setupEventListeners() {
 
   // Input Recherche
   const searchInput = document.getElementById('search-input');
-  searchInput.addEventListener('input', debounce(() => renderGrid(), 300));
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(() => renderGrid(), 300));
+  }
 
   // Modale Publication
   const modal = document.getElementById('modal-publish');
   const openBtns = [document.getElementById('btn-publish-trigger'), document.getElementById('btn-mobile-publish')];
   const closeBtn = document.getElementById('modal-close');
 
-  openBtns.forEach(btn => btn?.addEventListener('click', () => modal.classList.remove('hidden')));
-  closeBtn?.addEventListener('click', () => modal.classList.add('hidden'));
+  openBtns.forEach(btn => btn?.addEventListener('click', () => modal?.classList.remove('hidden')));
+  closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
 
   // Compteur caractères
   const texteInput = document.getElementById('texte-input');
   const charCounter = document.getElementById('char-counter');
-  texteInput?.addEventListener('input', (e) => {
-    charCounter.textContent = `${e.target.value.length} / 500`;
-  });
+  if (texteInput && charCounter) {
+    texteInput.addEventListener('input', (e) => {
+      charCounter.textContent = `${e.target.value.length} / 500`;
+    });
+  }
 
   // Soumission Formulaire
   document.getElementById('form-publish')?.addEventListener('submit', handlePublishSubmit);
@@ -85,7 +89,7 @@ function setupEventListeners() {
   document.getElementById('hero-push-btn')?.addEventListener('click', requestPushPermission);
 }
 
-// Récupération des données unifiées (News Externe + Google Sheets Administré)
+// Récupération des données unifiées
 async function fetchContent() {
   const gridLoader = document.getElementById('grid-loader');
   gridLoader?.classList.remove('hidden');
@@ -96,18 +100,27 @@ async function fetchContent() {
       fetch(`${CONFIG.API_BASE}/publications`)
     ]);
 
-    let newsData = newsRes.status === 'fulfilled' ? await newsRes.value.json() : [];
-    let pubData = pubRes.status === 'fulfilled' ? await pubRes.value.json() : [];
+    let newsData = [];
+    let pubData = [];
+
+    if (newsRes.status === 'fulfilled' && newsRes.value.ok) {
+      newsData = await newsRes.value.json().catch(() => []);
+    }
+
+    if (pubRes.status === 'fulfilled' && pubRes.value.ok) {
+      pubData = await pubRes.value.json().catch(() => []);
+    }
 
     // Taguer les types
-    newsData = newsData.map(n => ({ ...n, _sourceType: 'actualite' }));
-    pubData = pubData.map(p => ({ ...p, _sourceType: p.TYPE || 'annonce' }));
+    newsData = Array.isArray(newsData) ? newsData.map(n => ({ ...n, _sourceType: 'actualite' })) : [];
+    pubData = Array.isArray(pubData) ? pubData.map(p => ({ ...p, _sourceType: p.TYPE || 'annonce' })) : [];
 
     // Fusion & Tri par Date
-    stateItems = [...newsData, ...pubData].sort((a, b) => new Date(b.DATE_PUBLICATION || b.date) - new Date(a.DATE_PUBLICATION || a.date));
+    stateItems = [...newsData, ...pubData].sort((a, b) => new Date(b.DATE_PUBLICATION || b.date || 0) - new Date(a.DATE_PUBLICATION || a.date || 0));
     renderGrid();
   } catch (err) {
     console.error('Erreur API:', err);
+    renderGrid();
   } finally {
     gridLoader?.classList.add('hidden');
   }
@@ -116,12 +129,15 @@ async function fetchContent() {
 // Rendu Filtre & Recherche
 function renderGrid() {
   const grid = document.getElementById('content-grid');
-  const query = document.getElementById('search-input').value.toLowerCase();
+  if (!grid) return;
+
+  const searchElement = document.getElementById('search-input');
+  const query = searchElement ? searchElement.value.toLowerCase() : '';
 
   const filtered = stateItems.filter(item => {
     const matchType = currentFilter === 'tout' || item._sourceType === currentFilter;
     const matchCat = currentCategory === 'ALL' || (item.CATEGORIE || item.category) === currentCategory;
-    const textContent = `${item.TITRE || item.title} ${item.TEXTE || item.summary || ''} ${item.VILLE || ''}`.toLowerCase();
+    const textContent = `${item.TITRE || item.title || ''} ${item.TEXTE || item.summary || ''} ${item.VILLE || ''}`.toLowerCase();
     const matchQuery = textContent.includes(query);
 
     return matchType && matchCat && matchQuery;
@@ -130,7 +146,7 @@ function renderGrid() {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="col-span-full py-12 text-center text-slate-500">
-        <p class="text-base font-semibold">Aucun contenu ne correspond à vos critères.</p>
+        <p class="text-base font-semibold">Aucun contenu disponible pour le moment.</p>
       </div>`;
     return;
   }
@@ -141,9 +157,9 @@ function renderGrid() {
 // Dynamic Card Creator
 function createCardHTML(item) {
   const isExternal = item._sourceType === 'actualite';
-  const title = item.TITRE || item.title;
+  const title = item.TITRE || item.title || 'Sans titre';
   const text = item.TEXTE || item.summary || '';
-  const link = item.LIEN || item.link;
+  const link = item.LIEN || item.link || '#';
   const sourceName = item.source || 'INFO + RDC';
   const rawDate = item.DATE_PUBLICATION || item.date;
   const formattedDate = rawDate ? new Date(rawDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : '';
@@ -163,7 +179,7 @@ function createCardHTML(item) {
           <span class="text-slate-500">${formattedDate}</span>
         </div>
 
-        ${isExternal && item.image ? `
+        ${isExternal && (item.image || item.IMAGE_URL) ? `
           <div class="h-36 w-full overflow-hidden rounded-xl bg-slate-950">
             <img src="${image}" onerror="this.src='/logo.jpg'" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
           </div>
@@ -195,13 +211,15 @@ async function handlePublishSubmit(e) {
   const form = e.target;
   const btn = document.getElementById('btn-submit-form');
   
-  if (form.website_hp.value !== "") return; // Protection Honeypot Anti-Spam
+  if (form.website_hp && form.website_hp.value !== "") return; // Protection Honeypot
 
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
 
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours...';
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours...';
+  }
 
   try {
     const res = await fetch(`${CONFIG.API_BASE}/publications`, {
@@ -214,15 +232,17 @@ async function handlePublishSubmit(e) {
     if (res.ok) {
       alert('Votre publication a été transmise. Elle sera vérifiée avant diffusion.');
       form.reset();
-      document.getElementById('modal-publish').classList.add('hidden');
+      document.getElementById('modal-publish')?.classList.add('hidden');
     } else {
       alert(`Erreur: ${data.message || 'Soumission rejetée.'}`);
     }
   } catch (err) {
     alert('Erreur réseau lors de la transmission.');
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Soumettre pour validation';
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Soumettre pour validation';
+    }
   }
 }
 
@@ -242,20 +262,24 @@ async function requestPushPermission() {
   
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
-    const reg = await navigator.serviceWorker.ready;
-    const sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY)
-    });
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(CONFIG.VAPID_PUBLIC_KEY)
+      });
 
-    await fetch(`${CONFIG.API_BASE}/push/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sub)
-    });
+      await fetch(`${CONFIG.API_BASE}/push/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sub)
+      });
 
-    document.getElementById('push-indicator')?.classList.remove('hidden');
-    alert('Notifications INFO + RDC activées avec succès !');
+      document.getElementById('push-indicator')?.classList.remove('hidden');
+      alert('Notifications INFO + RDC activées avec succès !');
+    } catch (err) {
+      console.error('Erreur inscription Push:', err);
+    }
   }
 }
 
