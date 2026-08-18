@@ -4,7 +4,7 @@
  */
 
 const CONFIG = {
-  API_BASE: '/api', // Route relative automatique pour Render
+  API_BASE: '/api',
   VAPID_PUBLIC_KEY: 'BAKdVVtNU1YvnzlAZQw-j7qLqEi7M6bJ9BzA0DRSpTYHlJn1KW-W5wGCSh5tPDyfVmLc5Y109cH1bPx5gUQjOQo'
 };
 
@@ -24,7 +24,7 @@ async function initApp() {
   try {
     await fetchContent();
   } catch (e) {
-    console.error("Erreur d'initialisation:", e);
+    console.error('Erreur initialisation:', e);
   } finally {
     if (loader) {
       loader.classList.add('opacity-0');
@@ -89,7 +89,7 @@ function setupEventListeners() {
   document.getElementById('hero-push-btn')?.addEventListener('click', requestPushPermission);
 }
 
-// Récupération des données unifiées
+// Récupération des données
 async function fetchContent() {
   const gridLoader = document.getElementById('grid-loader');
   gridLoader?.classList.remove('hidden');
@@ -111,11 +111,9 @@ async function fetchContent() {
       pubData = await pubRes.value.json().catch(() => []);
     }
 
-    // Taguer les types
     newsData = Array.isArray(newsData) ? newsData.map(n => ({ ...n, _sourceType: 'actualite' })) : [];
     pubData = Array.isArray(pubData) ? pubData.map(p => ({ ...p, _sourceType: p.TYPE || 'annonce' })) : [];
 
-    // Fusion & Tri par Date
     stateItems = [...newsData, ...pubData].sort((a, b) => new Date(b.DATE_PUBLICATION || b.date || 0) - new Date(a.DATE_PUBLICATION || a.date || 0));
     renderGrid();
   } catch (err) {
@@ -126,7 +124,7 @@ async function fetchContent() {
   }
 }
 
-// Rendu Filtre & Recherche
+// Rendu Grille
 function renderGrid() {
   const grid = document.getElementById('content-grid');
   if (!grid) return;
@@ -211,7 +209,7 @@ async function handlePublishSubmit(e) {
   const form = e.target;
   const btn = document.getElementById('btn-submit-form');
   
-  if (form.website_hp && form.website_hp.value !== "") return; // Protection Honeypot
+  if (form.website_hp && form.website_hp.value !== "") return;
 
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
