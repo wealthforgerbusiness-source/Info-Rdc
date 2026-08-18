@@ -19,7 +19,7 @@ async function initApp() {
   try {
     await fetchContent();
   } catch (e) {
-    console.error(`Erreur d'initialisation:`, e);
+    console.error("Erreur initialisation:", e);
   } finally {
     if (loader) {
       loader.classList.add('opacity-0');
